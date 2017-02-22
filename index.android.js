@@ -11,6 +11,7 @@ import {
     Text,
     View
 } from 'react-native';
+import Blink from './src/Blink';
 
 export default class AwesomeProject extends Component {
     render() {

@@ -10,25 +10,21 @@ import {
     View
 } from 'react-native';
 
-// import * as network from "./Network";
+import * as network from "../util/Network";
 
 export default class Blink extends Component {
     constructor(props) {
         super(props);
         this.state = {showText: true};
-
+        this.state.textValue = this.props.children;
         // Toggle the state every second
         setInterval(() => {
             this.setState({showText: !this.state.showText});
         }, 1000);
     }
 
-    componentWillMount(){
-        network.getListOfImages();
-    }
-
     render() {
-        let display = this.state.showText ? this.props.text : ' ';
+        let display = this.state.showText ? this.state.textValue : ' ';
         return (
             <Text>{display}</Text>
         );

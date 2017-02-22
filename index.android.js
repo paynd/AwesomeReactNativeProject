@@ -11,7 +11,8 @@ import {
     Text,
     View
 } from 'react-native';
-import Blink from './src/Blink';
+import Blink from './src/ui/Blink';
+import ImageListView from './src/ui/ImageListView';
 
 export default class AwesomeProject extends Component {
     render() {
@@ -23,8 +24,10 @@ export default class AwesomeProject extends Component {
                 <Text style={styles.instructions}>
                     To get started, edit index.android.js
                 </Text>
-                <Blink text="Double tap R on your keyboard to reload,{'\n'}
- Shake or press menu button for dev menu"/>
+                <Blink>Double tap R on your keyboard to reload,{'\n'}
+                    Shake or press menu button for dev menu</Blink>
+
+                <ImageListView/>
             </View>
         );
     }

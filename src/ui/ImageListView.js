@@ -17,7 +17,7 @@ export default class ImageListView extends Component {
         this.processNetworkRequest(promise);
     }
 
-    processNetworkRequest(promise) {
+    processNetworkRequest = (promise) => {
         promise.then(function (response) {
             console.log(" responce typeof " + typeof response);
             const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -44,11 +44,11 @@ export default class ImageListView extends Component {
                 dataSource: undefined
             });
         })
-    }
+    };
 
     // componentDidMount() {}
 
-    renderList() {
+    renderList = () => {
         if (this.state.dataSource === undefined || this.state.dataSource === null) {
             return <p>No data loaded</p>
         } else {
@@ -56,7 +56,7 @@ export default class ImageListView extends Component {
                 dataSource={this.state.dataSource}
                 renderRow={(rowData) => <RowItem>{rowData}</RowItem> }/>;
         }
-    }
+    };
 
     render() {
         return (

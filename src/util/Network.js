@@ -20,12 +20,12 @@ export function getListOfImages() {
 
 }
 
-export async function getListOfImagesAwait() {
-    try {
-        let response = await fetch(moviesUrl);
-        let responseJson = await response.json();
-        return responseJson;
-    } catch (error) {
-        console.error(error);
-    }
-}
+// export async function getListOfImagesAwait() {
+//     try {
+//         let response = await fetch(moviesUrl);
+//         let responseJson = await response.json();
+//         return responseJson;
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }

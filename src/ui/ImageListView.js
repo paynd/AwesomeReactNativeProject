@@ -13,14 +13,15 @@ import * as network from '../util/Network'
 export default class ImageListView extends Component {
     constructor(props) {
         super(props);
-        let promise = network.getListOfImages();
-        this.state.isData = false;
-        this.processNetworkRequest(promise);
+        this.state = {
+            isData: false
+        };
+        this.processNetworkRequest(network.getListOfImages());
         this.processNetworkRequest.bind(this);
         this.renderList.bind(this);
     }
 
-    processNetworkRequest (){
+    processNetworkRequest(promise) {
         promise.then(function (response) {
             console.log(" responce typeof " + typeof response);
             const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -28,13 +29,15 @@ export default class ImageListView extends Component {
             if (response.status !== 200) {
                 console.log('### Looks like there was a problem. Status Code: ' +
                     response.status);
-                this.state.isData = false;
+                this.state.setState({
+                    isData: false
+                });
                 return;
             }
 
             console.log('### Ok');
 
-            response.json().then(function (data) {
+            response.json().then((data) => {
                 console.log("### array legth: " + data.length);
                 this.state.setState({
                     dataSource: ds.cloneWithRows(data), // here I got "Possible Unhandled Promise Rejection (id: 0):"
@@ -51,8 +54,8 @@ export default class ImageListView extends Component {
         })
     };
 
-    renderList (){
-        if (this.state.isData) {
+    renderList() {
+        if (this.state.isData === false) {
             return <p>No data loaded</p>
         } else {
             return <ListView

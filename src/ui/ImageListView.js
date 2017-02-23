@@ -56,7 +56,7 @@ export default class ImageListView extends Component {
 
     renderList() {
         if (this.state.isData === false) {
-            return <p>No data loaded</p>
+            return <Text>No data loaded</Text>
         } else {
             return <ListView
                 dataSource={this.state.dataSource}

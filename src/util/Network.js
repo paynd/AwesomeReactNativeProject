@@ -6,11 +6,12 @@ const photosUrl = 'https://jsonplaceholder.typicode.com/photos';
 const moviesUrl = 'https://facebook.github.io/react-native/movies.json';
 
 export function getListOfImages() {
-    return fetch(moviesUrl)
+    // return fetch(moviesUrl)
+    return fetch(photosUrl)
         .then(function (response) {
             // alert(response.headers.get('Content-Type')); // application/json; charset=utf-8
-            // alert(response.status); // 200
-            return response.json();
+            console.log("Response: " + response.status); // 200
+            return response;
         })
         // .then(data => return data;)
         .catch((error) => {

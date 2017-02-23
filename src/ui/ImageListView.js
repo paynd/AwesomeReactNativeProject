@@ -10,42 +10,33 @@ import {
 } from 'react-native';
 import * as network from '../util/Network'
 
-// function onFullfilled() {
-//     this.state
-// }
-//
-// function onRejected() {
-//
-// }
-
-
 export default class ImageListView extends Component {
-
-
-    // Initialize the hardcoded data
     constructor(props) {
         super(props);
         let promise = network.getListOfImages();
         promise.then(function (response) {
+            console.log(" responce typeof " + typeof response);
+            const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
             if (response.status !== 200) {
                 console.log('### Looks like there was a problem. Status Code: ' +
                     response.status);
                 return;
-            }else {
+            } else {
                 console.log('### Ok');
             }
 
-            // Examine the text in the response
             response.json().then(function (data) {
                 console.log(data);
-                console.log('### Error');
+                this.state = {
+                    dataSource: ds.cloneWithRows(data)
+                }
             });
         });
 
         promise.catch(function (err) {
             console.error("### Shit happens: ", err)
         });
-        this.state.dataSource = ['One','two'];
     }
 
     componentDidMount() {

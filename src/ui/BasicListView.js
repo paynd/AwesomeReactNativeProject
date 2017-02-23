@@ -26,8 +26,7 @@ export default class BasicListView extends Component {
             <View style={{flex: 1, paddingTop: 22}}>
                 <ListView
                     dataSource={this.state.dataSource}
-                    renderRow={(rowData) => <br><Text>{rowData}</Text>}
-                />
+                    renderRow={(rowData) => <Text>{rowData}</Text>}/>
             </View>
         );
     }

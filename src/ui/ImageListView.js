@@ -10,15 +10,46 @@ import {
 } from 'react-native';
 import * as network from '../util/Network'
 
+// function onFullfilled() {
+//     this.state
+// }
+//
+// function onRejected() {
+//
+// }
+
 
 export default class ImageListView extends Component {
+
+
     // Initialize the hardcoded data
     constructor(props) {
         super(props);
-        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-        this.state = {
-            dataSource: network.getListOfImages()
-        };
+        let promise = network.getListOfImages();
+        promise.then(function (response) {
+            if (response.status !== 200) {
+                console.log('### Looks like there was a problem. Status Code: ' +
+                    response.status);
+                return;
+            }else {
+                console.log('### Ok');
+            }
+
+            // Examine the text in the response
+            response.json().then(function (data) {
+                console.log(data);
+                console.log('### Error');
+            });
+        });
+
+        promise.catch(function (err) {
+            console.error("### Shit happens: ", err)
+        });
+        this.state.dataSource = ['One','two'];
+    }
+
+    componentDidMount() {
+
     }
 
     render() {
@@ -42,7 +73,7 @@ class RowItem extends Component {
         return (
             <View style={{flex: 1, paddingTop: 22}}>
                 <Image source={{uri: this.state.jsonItem.thumbnailUrl}}
-                       style={{width: 150, height: 150}} />
+                       style={{width: 150, height: 150}}/>
             </View>
         )
     }

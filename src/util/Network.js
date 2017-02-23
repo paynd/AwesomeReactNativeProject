@@ -2,16 +2,29 @@
  * Created by paynd on 22.02.17.
  */
 
-const jsonServerPlaceholder = 'https://jsonplaceholder.typicode.com/photos';
+const photosUrl = 'https://jsonplaceholder.typicode.com/photos';
+const moviesUrl = 'https://facebook.github.io/react-native/movies.json';
 
 export function getListOfImages() {
-    return fetch(jsonServerPlaceholder)
-        .then((response) => response.json())
-        .then((responseJson) => {
-            return responseJson;
+    return fetch(moviesUrl)
+        .then(function (response) {
+            // alert(response.headers.get('Content-Type')); // application/json; charset=utf-8
+            // alert(response.status); // 200
+            return response.json();
         })
+        // .then(data => return data;)
         .catch((error) => {
             console.error(error);
         });
 
+}
+
+export async function getListOfImagesAwait() {
+    try {
+        let response = await fetch(moviesUrl);
+        let responseJson = await response.json();
+        return responseJson;
+    } catch (error) {
+        console.error(error);
+    }
 }

@@ -14,6 +14,10 @@ export default class ImageListView extends Component {
     constructor(props) {
         super(props);
         let promise = network.getListOfImages();
+        this.processNetworkRequest(promise);
+    }
+
+    processNetworkRequest(promise) {
         promise.then(function (response) {
             console.log(" responce typeof " + typeof response);
             const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -22,33 +26,42 @@ export default class ImageListView extends Component {
                 console.log('### Looks like there was a problem. Status Code: ' +
                     response.status);
                 return;
-            } else {
-                console.log('### Ok');
             }
 
+            console.log('### Ok');
+
             response.json().then(function (data) {
-                console.log(data);
-                this.state = {
-                    dataSource: ds.cloneWithRows(data)
-                }
+                console.log("### array legth: " + data.length);
+                this.state.setState({
+                    dataSource: ds.cloneWithRows(data) // here I got "Possible Unhandled Promise Rejection (id: 0):"
+                });
             });
         });
 
         promise.catch(function (err) {
-            console.error("### Shit happens: ", err)
-        });
+            console.error("### Shit happens: ", err);
+            this.state.setState({
+                dataSource: undefined
+            });
+        })
     }
 
-    componentDidMount() {
+    // componentDidMount() {}
 
+    renderList() {
+        if (this.state.dataSource === undefined || this.state.dataSource === null) {
+            return <p>No data loaded</p>
+        } else {
+            return <ListView
+                dataSource={this.state.dataSource}
+                renderRow={(rowData) => <RowItem>{rowData}</RowItem> }/>;
+        }
     }
 
     render() {
         return (
             <View style={{flex: 1, paddingTop: 22}}>
-                <ListView
-                    dataSource={this.state.dataSource}
-                    renderRow={(rowData) => <RowItem>{rowData}</RowItem> }/>
+                {this.renderList()}
             </View>
         )
     }

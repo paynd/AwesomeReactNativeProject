@@ -14,6 +14,7 @@ export default class ImageListView extends Component {
     constructor(props) {
         super(props);
         let promise = network.getListOfImages();
+        this.state.isData = false;
         this.processNetworkRequest(promise);
     }
 
@@ -25,6 +26,7 @@ export default class ImageListView extends Component {
             if (response.status !== 200) {
                 console.log('### Looks like there was a problem. Status Code: ' +
                     response.status);
+                this.state.isData = false;
                 return;
             }
 
@@ -33,7 +35,8 @@ export default class ImageListView extends Component {
             response.json().then(function (data) {
                 console.log("### array legth: " + data.length);
                 this.state.setState({
-                    dataSource: ds.cloneWithRows(data) // here I got "Possible Unhandled Promise Rejection (id: 0):"
+                    dataSource: ds.cloneWithRows(data), // here I got "Possible Unhandled Promise Rejection (id: 0):"
+                    isData: true
                 });
             });
         });
@@ -41,7 +44,7 @@ export default class ImageListView extends Component {
         promise.catch(function (err) {
             console.error("### Shit happens: ", err);
             this.state.setState({
-                dataSource: undefined
+                isData: false
             });
         })
     };
@@ -49,7 +52,7 @@ export default class ImageListView extends Component {
     // componentDidMount() {}
 
     renderList = () => {
-        if (this.state.dataSource === undefined || this.state.dataSource === null) {
+        if (this.state.isData) {
             return <p>No data loaded</p>
         } else {
             return <ListView

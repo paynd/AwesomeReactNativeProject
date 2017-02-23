@@ -16,9 +16,11 @@ export default class ImageListView extends Component {
         let promise = network.getListOfImages();
         this.state.isData = false;
         this.processNetworkRequest(promise);
+        this.processNetworkRequest.bind(this);
+        this.renderList.bind(this);
     }
 
-    processNetworkRequest = (promise) => {
+    processNetworkRequest (){
         promise.then(function (response) {
             console.log(" responce typeof " + typeof response);
             const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -49,9 +51,7 @@ export default class ImageListView extends Component {
         })
     };
 
-    // componentDidMount() {}
-
-    renderList = () => {
+    renderList (){
         if (this.state.isData) {
             return <p>No data loaded</p>
         } else {

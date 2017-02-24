@@ -16,42 +16,49 @@ export default class ImageListView extends Component {
         this.state = {
             isData: false
         };
-        this.processNetworkRequest(network.getListOfImages());
         this.processNetworkRequest.bind(this);
         this.renderList.bind(this);
+        this.onSucces.bind(this);
+        this.onError.bind(this);
+    }
+
+    componentDidMount(){
+        this.processNetworkRequest(network.getListOfImages());
+    }
+
+    onSucces(response) {
+        console.log(" responce typeof " + typeof response);
+        const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
+        // if (response.status !== 200) {
+        //     console.log('### Status Code: ' + response.status);
+        //     this.state.setState({
+        //         isData: false
+        //     });
+        //     return;
+        // }
+
+        console.log('### Ok');
+
+        response.json().then((data) => {
+            console.log("### array legth: " + data.length);
+            this.state.setState({
+                dataSource: ds.cloneWithRows(data), // here I got "Possible Unhandled Promise Rejection (id: 0):"
+                isData: true
+            });
+        });
+    }
+
+    onError(err){
+        console.error("### Shit happens: ", err);
+        this.state.setState({
+            isData: false
+        });
     }
 
     processNetworkRequest(promise) {
-        promise.then(function (response) {
-            console.log(" responce typeof " + typeof response);
-            const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-
-            if (response.status !== 200) {
-                console.log('### Looks like there was a problem. Status Code: ' +
-                    response.status);
-                this.state.setState({
-                    isData: false
-                });
-                return;
-            }
-
-            console.log('### Ok');
-
-            response.json().then((data) => {
-                console.log("### array legth: " + data.length);
-                this.state.setState({
-                    dataSource: ds.cloneWithRows(data), // here I got "Possible Unhandled Promise Rejection (id: 0):"
-                    isData: true
-                });
-            });
-        });
-
-        promise.catch(function (err) {
-            console.error("### Shit happens: ", err);
-            this.state.setState({
-                isData: false
-            });
-        })
+        promise.then(this.onSucces);
+        promise.catch(this.onError)
     };
 
     renderList() {

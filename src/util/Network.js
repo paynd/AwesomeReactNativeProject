@@ -12,9 +12,7 @@ export function getListOfImages() {
             // alert(response.headers.get('Content-Type')); // application/json; charset=utf-8
             console.log("Response: " + response.status); // 200
             return response;
-        })
-        // .then(data => return data;)
-        .catch((error) => {
+        }).catch((error) => {
             console.error(error);
         });
 

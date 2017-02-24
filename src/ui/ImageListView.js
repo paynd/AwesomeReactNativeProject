@@ -2,9 +2,17 @@
  * Created by paynd on 22.02.17.
  */
 import React, { Component } from 'react'
-import { ListView, Text, View } from 'react-native'
+import { ListView, Text, View, StyleSheet } from 'react-native'
 import getListOfImages from '../util/Network'
 import RowItemRenderer from './RowItem'
+
+const styles = StyleSheet.create({
+  separator: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#8E8E8E',
+  },
+})
 
 export default class ImageListView extends Component {
   state = {
@@ -45,6 +53,7 @@ export default class ImageListView extends Component {
       <ListView
         dataSource={this.state.dataSource}
         renderRow={data => <RowItemRenderer {...data} />}
+        renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
       />
     )
   }

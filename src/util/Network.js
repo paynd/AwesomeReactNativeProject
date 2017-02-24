@@ -1,12 +1,8 @@
 /**
  * Created by paynd on 22.02.17.
  */
-
-const photosUrl = 'https://jsonplaceholder.typicode.com/photos'
-// const moviesUrl = 'https://facebook.github.io/react-native/movies.json'
-
-default
-export function getListOfImages () {
+export default function getListOfImages() {
+  const photosUrl = 'https://jsonplaceholder.typicode.com/photos'
   // return fetch(moviesUrl)
   return fetch(photosUrl)
     .then((response) => {

@@ -3,7 +3,7 @@
  */
 import React, { Component, PropTypes } from 'react'
 import { ListView, Text, View } from 'react-native'
-import * as network from '../util/Network'
+import getListOfImages from '../util/Network'
 
 export default class ImageListView extends Component {
   state = {
@@ -11,7 +11,7 @@ export default class ImageListView extends Component {
   }
 
   componentDidMount() {
-    this.processNetworkRequest(network.getListOfImages())
+    getListOfImages().then(this.onSuccess).catch(this.onError)
   }
 
   onSuccess = (response) => {
@@ -42,10 +42,6 @@ export default class ImageListView extends Component {
     this.setState({
       isData: false,
     })
-  }
-
-  processNetworkRequest = (promise) => {
-    promise.then(this.onSuccess).catch(this.onError)
   }
 
   renderList = () => {

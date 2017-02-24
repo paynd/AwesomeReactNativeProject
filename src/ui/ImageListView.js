@@ -32,7 +32,7 @@ export default class ImageListView extends Component {
 
         // if (response.status !== 200) {
         //     console.log('### Status Code: ' + response.status);
-        //     this.state.setState({
+        //     this.setState({
         //         isData: false
         //     });
         //     return;
@@ -42,7 +42,7 @@ export default class ImageListView extends Component {
 
         response.json().then((data) => {
             console.log("### array legth: " + data.length);
-            this.state.setState({
+            this.setState({
                 dataSource: ds.cloneWithRows(data), // here I got "Possible Unhandled Promise Rejection (id: 0):"
                 isData: true
             });
@@ -51,7 +51,7 @@ export default class ImageListView extends Component {
 
     onError(err){
         console.error("### Shit happens: ", err);
-        this.state.setState({
+        this.setState({
             isData: false
         });
     }

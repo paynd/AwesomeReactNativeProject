@@ -9,11 +9,16 @@ import {
     AppRegistry,
     StyleSheet,
     Text,
+    Button,
     View,
 } from 'react-native'
 import Blink from './src/ui/Blink'
 import ImageListView from './src/ui/ImageListView'
+import ContactPicker from './src/modules/ContactPicker'
 
+const onButtonPress = () => {
+  ContactPicker.selectContact(false)
+}
 export default class AwesomeProject extends Component {
   render() {
     return (
@@ -26,6 +31,12 @@ export default class AwesomeProject extends Component {
                 </Text>
         <Blink>Double tap R on your keyboard to reload,{'\n'}
                     Shake or press menu button for dev menu</Blink>
+        <Button
+          onPress={onButtonPress}
+          title="Pick contact"
+          color="#841584"
+          accessibilityLabel="Bla-bla accessibilityLabel"
+        />
 
         <ImageListView />
       </View>

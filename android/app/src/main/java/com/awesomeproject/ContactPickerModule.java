@@ -25,7 +25,7 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class ContactPickerModule extends ReactContextBaseJavaModule {
-    private static final String CONTACT_PICKER_MODULE = "CONTACT_PICKER_MODULE";
+    private static final String CONTACT_PICKER_MODULE = "ContactPickerModule";
     private static final int PICK_CONTACT_REQUEST = 55667788;
     private static final String ERR_ACTIVITY_DOES_NOT_EXIST = "ERR_ACTIVITY_DOES_NOT_EXIST";
     private static final String ERR_PICKER_CANCELLED = "ERR_PICKER_CANCELLED";
@@ -58,19 +58,19 @@ public class ContactPickerModule extends ReactContextBaseJavaModule {
         }
     };
 
-//    private void processResult(Activity activity, Intent data) {
-//        activity.startActivity(new Intent(Intent.ACTION_VIEW,
-//                data.getData()));
-//    }
-
     private void processResult(Activity activity, Intent data) {
-        Uri contactData = data.getData();
-        Cursor c =  activity.getContentResolver().query(contactData, null, null, null, null);
-        if (c.moveToFirst()) {
-            String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-            // TODO here we need to construct a new object to return into promise
-        }
+        activity.startActivity(new Intent(Intent.ACTION_VIEW,
+                data.getData()));
     }
+
+//    private void processResult(Activity activity, Intent data) {
+//        Uri contactData = data.getData();
+//        Cursor c =  activity.getContentResolver().query(contactData, null, null, null, null);
+//        if (c.moveToFirst()) {
+//            String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+//            // TODO here we need to construct a new object to return into promise
+//        }
+//    }
 
     public ContactPickerModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -99,7 +99,7 @@ public class ContactPickerModule extends ReactContextBaseJavaModule {
      * @param forceChooser true if we need to force user to choose contacts app
      */
     @ReactMethod
-    public void selectContact(Promise promise, boolean forceChooser) {
+    public void selectContact(boolean forceChooser, Promise promise) {
         Activity currentActivity = getCurrentActivity();
 
         if (currentActivity == null) {

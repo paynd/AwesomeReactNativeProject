@@ -14,6 +14,12 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+
+import bolts.Continuation;
+import bolts.Task;
+
 import static android.provider.ContactsContract.CommonDataKinds.Email;
 import static android.provider.ContactsContract.CommonDataKinds.Event;
 import static android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -104,168 +110,211 @@ public class ContactManager {
         contact = new Contact();
     }
 
-    public void processIntent(Intent data, Promise promise) {
+    public void processIntent(Intent data, final Promise promise) {
         Uri contactData = data.getData();
         String lookup = Uri.parse(contactData.getPath()).getPathSegments().get(2);
         Log.d(DEBUG_TAG, "lookup# " + lookup);
 
-        // FIXME: 06.03.17 add concurrent execution
+        ArrayList<Task<Void>> tasks = new ArrayList<Task<Void>>();
+        tasks.add(loadBirthday(lookup));
+        tasks.add(loadPostals(lookup));
+        tasks.add(loadNames(lookup));
+        tasks.add(loadEmails(lookup));
+        tasks.add(loadPhones(lookup));
+        tasks.add(loadWebsites(lookup));
+        tasks.add(loadPhotoUri(lookup));
 
-        loadBirthday(lookup);
-        loadPostals(lookup);
-        loadNames(lookup);
-        loadEmails(lookup);
-        loadPhones(lookup);
-        loadWebsites(lookup);
-        loadPhotoUri(lookup);
-
-        promise.resolve(contact.getContact()); // FIXME: 06.03.17 add error handling
-    }
-
-    private void loadBirthday(@NonNull String lookup) {
-        Log.d(DEBUG_TAG, "loadBirthday, lookup# " + lookup);
-        Cursor cursor = contentResolver.query(
-                ContactsContract.Data.CONTENT_URI,
-                PROJECTION_BIRTHDAY,
-                SELECTION_BIRTHDAY,
-                new String[]{
-                        lookup
-                },
-                null
-        );
-
-        try {
-            contact.setBirthday(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+        Task.whenAll(tasks).onSuccess(new Continuation<Void, Object>() {
+            @Override
+            public Object then(Task<Void> task) throws Exception {
+                promise.resolve(contact.getContact());
+                return null;
             }
-        }
+        });
+        // FIXME: error handling
     }
 
-    private void loadEmails(@NonNull String lookup) {
-        Log.d(DEBUG_TAG, "loadEmailInfo, lookup# " + lookup);
-        Cursor cursor = contentResolver.query(
-                Email.CONTENT_URI,
-                PROJECTION_EMAIL,
-                SELECTION_EMAILS,
-                new String[]{
-                        lookup
-                },
-                null
-        );
+    private Task<Void> loadBirthday(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
 
-        try {
-            contact.setEmails(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
+                Log.d(DEBUG_TAG, "loadBirthday, lookup# " + lookup);
+                Cursor cursor = contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        PROJECTION_BIRTHDAY,
+                        SELECTION_BIRTHDAY,
+                        new String[]{
+                                lookup
+                        },
+                        null
+                );
 
-    private void loadPostals(@NonNull String lookup) {
-        Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
-        Cursor cursor = contentResolver.query(
-                StructuredPostal.CONTENT_URI,
-                PROJECTION_ADDRESS,
-                SELECTION_POSTALS,
-                new String[]{
-                        lookup
-                },
-                null
-        );
-
-        try {
-            contact.setPostals(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    private void loadNames(@NonNull String lookup) { //+
-        Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
-        Cursor cursor = contentResolver.query(
-                ContactsContract.Data.CONTENT_URI,
-                PROJECTION_NAME,
-                SELECTION_NAME,
-                new String[]{
-                        lookup
-                },
-                null
-        );
-
-        try {
-            contact.setName(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    private void loadPhones(@NonNull String lookup) {
-        Log.d(DEBUG_TAG, "fillPhones");
-        Cursor cursor = null;
-        try {
-            cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
-                    PROJECTION_PHONES,
-                    SELECTION_PHONES,
-                    new String[]{lookup},
-                    null
-            );
-            contact.setPhones(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    private void loadWebsites(String lookup) {
-        Log.d(DEBUG_TAG, "fillWebsitesData");
-        Cursor cursor = null;
-        try {
-            cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
-                    PROJECTION_WEBSITES,
-                    SELECTION_WEBSITE,
-                    new String[]{lookup},
-                    null
-            );
-
-            contact.setWebsites(cursor);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
-    private void loadPhotoUri(String lookup) {
-        Cursor cursor = contentResolver.query(
-                ContactsContract.Data.CONTENT_URI,
-                PHOTO_PROJECTION,
-                SELECTION_PHOTO,
-                new String[]{lookup},
-                null
-        );
-        try {
-            if (cursor != null && cursor.moveToNext()) {
-                String rawPhotoURI = cursor.getString(
-                        cursor.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Contactables.PHOTO_URI));
-                if (!TextUtils.isEmpty(rawPhotoURI)) {
-                    Log.e(DEBUG_TAG, "PHOTO: " + rawPhotoURI);
-                    contact.putPhotoUri(rawPhotoURI);
+                try {
+                    contact.setBirthday(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
                 }
+                return null;
             }
-        } finally {
-            if (cursor != null) {
-                cursor.close();
+        });
+    }
+
+    private Task<Void> loadEmails(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Log.d(DEBUG_TAG, "loadEmailInfo, lookup# " + lookup);
+                Cursor cursor = contentResolver.query(
+                        Email.CONTENT_URI,
+                        PROJECTION_EMAIL,
+                        SELECTION_EMAILS,
+                        new String[]{
+                                lookup
+                        },
+                        null
+                );
+
+                try {
+                    contact.setEmails(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
             }
-        }
+        });
+    }
+
+    private Task<Void> loadPostals(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
+                Cursor cursor = contentResolver.query(
+                        StructuredPostal.CONTENT_URI,
+                        PROJECTION_ADDRESS,
+                        SELECTION_POSTALS,
+                        new String[]{
+                                lookup
+                        },
+                        null
+                );
+
+                try {
+                    contact.setPostals(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    private Task<Void> loadNames(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
+                Cursor cursor = contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        PROJECTION_NAME,
+                        SELECTION_NAME,
+                        new String[]{
+                                lookup
+                        },
+                        null
+                );
+
+                try {
+                    contact.setName(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    private Task<Void> loadPhones(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Log.d(DEBUG_TAG, "fillPhones");
+                Cursor cursor = null;
+                try {
+                    cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
+                            PROJECTION_PHONES,
+                            SELECTION_PHONES,
+                            new String[]{lookup},
+                            null
+                    );
+                    contact.setPhones(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    private Task<Void> loadWebsites(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Log.d(DEBUG_TAG, "fillWebsitesData");
+                Cursor cursor = null;
+                try {
+                    cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
+                            PROJECTION_WEBSITES,
+                            SELECTION_WEBSITE,
+                            new String[]{lookup},
+                            null
+                    );
+
+                    contact.setWebsites(cursor);
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    private Task<Void> loadPhotoUri(@NonNull final String lookup) {
+        return Task.callInBackground(new Callable<Void>() {
+            public Void call() {
+                Cursor cursor = contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        PHOTO_PROJECTION,
+                        SELECTION_PHOTO,
+                        new String[]{lookup},
+                        null
+                );
+
+                try {
+                    if (cursor != null && cursor.moveToNext()) {
+                        String rawPhotoURI = cursor.getString(
+                                cursor.getColumnIndex(
+                                        ContactsContract.CommonDataKinds.Contactables.PHOTO_URI));
+                        if (!TextUtils.isEmpty(rawPhotoURI)) {
+                            Log.e(DEBUG_TAG, "PHOTO: " + rawPhotoURI);
+                            contact.putPhotoUri(rawPhotoURI);
+                        }
+                    }
+                } finally {
+                    if (cursor != null) {
+                        cursor.close();
+                    }
+                }
+                return null;
+            }
+        });
     }
 
     private static class Contact {

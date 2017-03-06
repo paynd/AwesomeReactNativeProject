@@ -32,10 +32,10 @@ import static android.provider.ContactsContract.CommonDataKinds.Website;
  */
 
 public class ContactManager {
-    public static final String DEBUG_TAG = "#debug";
-    public static final String TYPE = "type";
-    public static final String UNDEF = "undefined";
-
+    private static final String TYPE = "type";
+    private static final String UNDEF = "undefined";
+    private static final String ERR_READ_CONTACT = "ERR_READ_CONTACT";
+    private static final String READ_CONTACT_TEXT = "Error during reading contact data.";
 
     private static final String[] PROJECTION_PHONES =
             {
@@ -113,32 +113,34 @@ public class ContactManager {
     public void processIntent(Intent data, final Promise promise) {
         Uri contactData = data.getData();
         String lookup = Uri.parse(contactData.getPath()).getPathSegments().get(2);
-        Log.d(DEBUG_TAG, "lookup# " + lookup);
 
-        ArrayList<Task<Void>> tasks = new ArrayList<Task<Void>>();
-        tasks.add(loadBirthday(lookup));
-        tasks.add(loadPostals(lookup));
-        tasks.add(loadNames(lookup));
-        tasks.add(loadEmails(lookup));
-        tasks.add(loadPhones(lookup));
-        tasks.add(loadWebsites(lookup));
-        tasks.add(loadPhotoUri(lookup));
+        try {
+            ArrayList<Task<Void>> tasks = new ArrayList<Task<Void>>();
+            tasks.add(loadBirthday(lookup));
+            tasks.add(loadPostals(lookup));
+            tasks.add(loadNames(lookup));
+            tasks.add(loadEmails(lookup));
+            tasks.add(loadPhones(lookup));
+            tasks.add(loadWebsites(lookup));
+            tasks.add(loadPhotoUri(lookup));
 
-        Task.whenAll(tasks).onSuccess(new Continuation<Void, Object>() {
-            @Override
-            public Object then(Task<Void> task) throws Exception {
-                promise.resolve(contact.getContact());
-                return null;
-            }
-        });
-        // FIXME: error handling
+            Task.whenAll(tasks).continueWith(new Continuation<Void, Object>() {
+                @Override
+                public Object then(Task<Void> task) throws Exception {
+                    promise.resolve(contact.getContact());
+                    return null;
+                }
+            });
+
+        } catch (Exception e) { // FIXME: error handling
+            promise.reject(ERR_READ_CONTACT, READ_CONTACT_TEXT);
+        }
     }
 
     private Task<Void> loadBirthday(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
 
-                Log.d(DEBUG_TAG, "loadBirthday, lookup# " + lookup);
                 Cursor cursor = contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
                         PROJECTION_BIRTHDAY,
@@ -164,7 +166,6 @@ public class ContactManager {
     private Task<Void> loadEmails(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
-                Log.d(DEBUG_TAG, "loadEmailInfo, lookup# " + lookup);
                 Cursor cursor = contentResolver.query(
                         Email.CONTENT_URI,
                         PROJECTION_EMAIL,
@@ -190,7 +191,6 @@ public class ContactManager {
     private Task<Void> loadPostals(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
-                Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
                 Cursor cursor = contentResolver.query(
                         StructuredPostal.CONTENT_URI,
                         PROJECTION_ADDRESS,
@@ -216,7 +216,6 @@ public class ContactManager {
     private Task<Void> loadNames(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
-                Log.d(DEBUG_TAG, "loadPostalAddressInfo, lookup# " + lookup);
                 Cursor cursor = contentResolver.query(
                         ContactsContract.Data.CONTENT_URI,
                         PROJECTION_NAME,
@@ -242,7 +241,6 @@ public class ContactManager {
     private Task<Void> loadPhones(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
-                Log.d(DEBUG_TAG, "fillPhones");
                 Cursor cursor = null;
                 try {
                     cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
@@ -265,7 +263,6 @@ public class ContactManager {
     private Task<Void> loadWebsites(@NonNull final String lookup) {
         return Task.callInBackground(new Callable<Void>() {
             public Void call() {
-                Log.d(DEBUG_TAG, "fillWebsitesData");
                 Cursor cursor = null;
                 try {
                     cursor = contentResolver.query(ContactsContract.Data.CONTENT_URI,
@@ -303,7 +300,6 @@ public class ContactManager {
                                 cursor.getColumnIndex(
                                         ContactsContract.CommonDataKinds.Contactables.PHOTO_URI));
                         if (!TextUtils.isEmpty(rawPhotoURI)) {
-                            Log.e(DEBUG_TAG, "PHOTO: " + rawPhotoURI);
                             contact.putPhotoUri(rawPhotoURI);
                         }
                     }
@@ -347,7 +343,6 @@ public class ContactManager {
                 return UNDEF;
 
             } catch (NumberFormatException ex) {
-                Log.d(DEBUG_TAG, "NumberFormatException: => undefined");
                 return UNDEF;
             }
         }
@@ -444,7 +439,7 @@ public class ContactManager {
 
         void putPhotoUri(String uri) {
             if (!TextUtils.isEmpty(uri)) {
-                contact.putString("prhoto_uri", uri);
+                contact.putString("local_photo_uri", uri);
             }
         }
 
@@ -477,7 +472,6 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-            Log.d(DEBUG_TAG, "\nphones array: " + phones.toString() + "\n");
             contact.putArray("phones", phones);
         }
 
@@ -488,7 +482,6 @@ public class ContactManager {
                     WritableMap map = Arguments.createMap();
                     putString(cursor, map, "address", Email.ADDRESS);
                     putString(cursor, map, TYPE, Types.EMAIL);
-                    Log.d(DEBUG_TAG, "\nemails array: +1");
                     emails.pushMap(map);
                 }
             } finally {
@@ -497,7 +490,6 @@ public class ContactManager {
                 }
             }
 
-            Log.d(DEBUG_TAG, "\nemails array: " + emails.toString() + "\n");
             contact.putArray("emails", emails);
         }
 
@@ -516,7 +508,6 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-            Log.d(DEBUG_TAG, "\nwebsites array: " + websites.toString() + "\n");
             contact.putArray("websites", websites);
         }
 
@@ -544,7 +535,6 @@ public class ContactManager {
         }
 
         public WritableMap getContact() {
-            Log.d(DEBUG_TAG, "\ngetContact: " + contact.toString() + "\n");
             return contact;
         }
 

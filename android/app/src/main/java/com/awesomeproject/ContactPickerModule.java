@@ -28,8 +28,7 @@ public class ContactPickerModule extends ReactContextBaseJavaModule {
     private static final String PICKER_CANCELLED_TEXT = "Contact picker cancelled.";
     private static final String ERR_FAILED_TO_SHOW_PICKER = "ERR_FAILED_TO_SHOW_PICKER";
     private static final String PICK_CONTACT_TEXT = "Trying to pick a contact.";
-    private static final String ERR_READ_CONTACT = "ERR_READ_CONTACT";
-    private static final String READ_CONTACT_TEXT = "Error during reading contact data.";
+
     private Promise mPickerPromise;
     private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
         @Override

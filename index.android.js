@@ -5,42 +5,70 @@
  */
 
 import React, { Component } from 'react'
-import {
-    AppRegistry,
-    StyleSheet,
-    Text,
-    Button,
-    View,
-} from 'react-native'
-import Blink from './src/ui/Blink'
+import { AppRegistry,
+  Button,
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  View } from 'react-native'
+// import Blink from './src/ui/Blink'
 import ImageListView from './src/ui/ImageListView'
 import ContactPicker from './src/modules/ContactPicker'
 
-const onButtonPress = () => {
-  ContactPicker.selectContact(false)
+const onPickContactPressed = () => {
+  const result = ContactPicker.selectContact(false)
+  console.log(`picking result:${result}`)
+}
+const onRequestPermissionPressed = () => {
+  requestReadContacts()
 }
 export default class AwesomeProject extends Component {
   render() {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-                    Welcome to React Native!
-                </Text>
+          Welcome to React Native!
+        </Text>
         <Text style={styles.instructions}>
-                    To get started, edit index.android.js
-                </Text>
-        <Blink>Double tap R on your keyboard to reload,{'\n'}
-                    Shake or press menu button for dev menu</Blink>
+          To get started, edit index.android.js
+        </Text>
         <Button
-          onPress={onButtonPress}
+          onPress={onPickContactPressed}
           title="Pick contact"
-          color="#841584"
+          style={styles.button}
+          accessibilityLabel="Bla-bla accessibilityLabel"
+        />
+        <Button
+          onPress={onRequestPermissionPressed}
+          title="Request Permission"
+          style={styles.button}
           accessibilityLabel="Bla-bla accessibilityLabel"
         />
 
         <ImageListView />
       </View>
     )
+  }
+}
+async function requestReadContacts() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+      {
+        title: 'Cool Read contacts Permission',
+        message: 'Awesome App needs access to your contacts ' +
+        'so you can take awesome pictures.',
+      }
+    )
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('You can read contacts')
+    } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+      console.log('NEVER_ASK_AGAIN')
+    } else {
+      console.log('Contacts permission denied')
+    }
+  } catch (err) {
+    console.warn(err)
   }
 }
 
@@ -60,6 +88,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
+  },
+  button: {
+    textAlign: 'center',
+    color: '#841584',
+    margin: 5,
+    padding: 10,
   },
 })
 

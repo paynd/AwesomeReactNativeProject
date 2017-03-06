@@ -2,11 +2,10 @@ package com.awesomeproject;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import com.awesomeproject.contact.ContactManager;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
@@ -20,21 +19,18 @@ import javax.annotation.Nullable;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * Created by paynd on 01.03.17.
- */
-
 public class ContactPickerModule extends ReactContextBaseJavaModule {
+    public static final String DEBUG_TAG = "#debug";
+    private static final int PICK_CONTACT_REQUEST = 7788;
     private static final String CONTACT_PICKER_MODULE = "ContactPickerModule";
-    private static final int PICK_CONTACT_REQUEST = 55667788;
     private static final String ERR_ACTIVITY_DOES_NOT_EXIST = "ERR_ACTIVITY_DOES_NOT_EXIST";
     private static final String ERR_PICKER_CANCELLED = "ERR_PICKER_CANCELLED";
     private static final String PICKER_CANCELLED_TEXT = "Contact picker cancelled.";
     private static final String ERR_FAILED_TO_SHOW_PICKER = "ERR_FAILED_TO_SHOW_PICKER";
     private static final String PICK_CONTACT_TEXT = "Trying to pick a contact.";
-
+    private static final String ERR_READ_CONTACT = "ERR_READ_CONTACT";
+    private static final String READ_CONTACT_TEXT = "Error during reading contact data.";
     private Promise mPickerPromise;
-
     private final ActivityEventListener mActivityEventListener = new BaseActivityEventListener() {
         @Override
         public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
@@ -44,33 +40,21 @@ public class ContactPickerModule extends ReactContextBaseJavaModule {
                     if (resultCode == Activity.RESULT_CANCELED) {
                         mPickerPromise.reject(ERR_PICKER_CANCELLED, PICKER_CANCELLED_TEXT);
                     } else if (resultCode == RESULT_OK) {
-                        processResult(activity, data);
+//                        WritableMap contactMap = processResult(data);
+//                        if (contactMap != null) {
+//                            mPickerPromise.resolve(contactMap);
+//                        } else {
+//                            mPickerPromise.reject(ERR_READ_CONTACT, READ_CONTACT_TEXT);
+//                        }
+                        ContactManager contactManager = new ContactManager(getCurrentActivity().getContentResolver());
+                        contactManager.processIntent(data, mPickerPromise);
                     }
                 }
             } else {
                 Log.e("ContactPickerModule", "Wut? We have lost the Promise object!");
             }
         }
-
-        @Override
-        public void onNewIntent(Intent intent) {
-            super.onNewIntent(intent);
-        }
     };
-
-    private void processResult(Activity activity, Intent data) {
-        activity.startActivity(new Intent(Intent.ACTION_VIEW,
-                data.getData()));
-    }
-
-//    private void processResult(Activity activity, Intent data) {
-//        Uri contactData = data.getData();
-//        Cursor c =  activity.getContentResolver().query(contactData, null, null, null, null);
-//        if (c.moveToFirst()) {
-//            String name = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-//            // TODO here we need to construct a new object to return into promise
-//        }
-//    }
 
     public ContactPickerModule(ReactApplicationContext reactContext) {
         super(reactContext);

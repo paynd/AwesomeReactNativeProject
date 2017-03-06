@@ -14,9 +14,6 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static android.provider.ContactsContract.CommonDataKinds.Email;
 import static android.provider.ContactsContract.CommonDataKinds.Event;
 import static android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -73,9 +70,10 @@ public class ContactManager {
                     StructuredPostal.REGION,
                     StructuredPostal.COUNTRY,
             };
-    private static final List<String> PHOTO_PROJECTION = new ArrayList<String>() {{
-        add(ContactsContract.CommonDataKinds.Contactables.PHOTO_URI);
-    }}; // // TODO: 06.03.17 add photo extraction
+    private static final String[] PHOTO_PROJECTION =
+            {
+                    ContactsContract.CommonDataKinds.Contactables.PHOTO_URI
+            };
 
     private static final String SELECTION_LOOKUP_KEY = ContactsContract.Data.LOOKUP_KEY + " = ? AND "
             + ContactsContract.Data.MIMETYPE + "='";
@@ -94,6 +92,8 @@ public class ContactManager {
                     Event.CONTENT_ITEM_TYPE + "' AND " +
                     Event.TYPE + "=" +
                     Event.TYPE_BIRTHDAY;
+    private static final String SELECTION_PHOTO =
+            SELECTION_LOOKUP_KEY + ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE + "'";
 
 
     private final ContentResolver contentResolver;
@@ -117,6 +117,7 @@ public class ContactManager {
         loadEmails(lookup);
         loadPhones(lookup);
         loadWebsites(lookup);
+        loadPhotoUri(lookup);
 
         promise.resolve(contact.getContact()); // FIXME: 06.03.17 add error handling
     }
@@ -242,6 +243,30 @@ public class ContactManager {
         }
     }
 
+    private void loadPhotoUri(String lookup) {
+        Cursor cursor = contentResolver.query(
+                ContactsContract.Data.CONTENT_URI,
+                PHOTO_PROJECTION,
+                SELECTION_PHOTO,
+                new String[]{lookup},
+                null
+        );
+        try {
+            if (cursor != null && cursor.moveToNext()) {
+                String rawPhotoURI = cursor.getString(
+                        cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Contactables.PHOTO_URI));
+                if (!TextUtils.isEmpty(rawPhotoURI)) {
+                    Log.e(DEBUG_TAG, "PHOTO: " + rawPhotoURI);
+                    contact.putPhotoUri(rawPhotoURI);
+                }
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
 
     private static class Contact {
         WritableMap contact = Arguments.createMap();
@@ -365,6 +390,12 @@ public class ContactManager {
                 }
             } finally {
                 cursor.close();
+            }
+        }
+
+        void putPhotoUri(String uri) {
+            if (!TextUtils.isEmpty(uri)) {
+                contact.putString("prhoto_uri", uri);
             }
         }
 

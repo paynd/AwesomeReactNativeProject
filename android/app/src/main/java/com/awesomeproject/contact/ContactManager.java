@@ -127,6 +127,7 @@ public class ContactManager {
             Task.whenAll(tasks).continueWith(new Continuation<Void, Object>() {
                 @Override
                 public Object then(Task<Void> task) throws Exception {
+                    Log.d("#debug", "Result: " + contact.getContact().toString());
                     promise.resolve(contact.getContact());
                     return null;
                 }
@@ -472,7 +473,9 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-            contact.putArray("phones", phones);
+            if (phones.size() > 0) {
+                contact.putArray("phones", phones);
+            }
         }
 
         void setEmails(@NonNull Cursor cursor) {
@@ -489,8 +492,9 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-
-            contact.putArray("emails", emails);
+            if (emails.size() > 0) {
+                contact.putArray("emails", emails);
+            }
         }
 
         void setWebsites(@NonNull Cursor cursor) {
@@ -508,7 +512,9 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-            contact.putArray("websites", websites);
+            if (websites.size() > 0) {
+                contact.putArray("websites", websites);
+            }
         }
 
         void setPostals(@NonNull Cursor cursor) {
@@ -531,7 +537,9 @@ public class ContactManager {
                     cursor.close();
                 }
             }
-            contact.putArray("postals", postalAddresses);
+            if (postalAddresses.size() > 0) {
+                contact.putArray("postals", postalAddresses);
+            }
         }
 
         public WritableMap getContact() {

@@ -31,6 +31,7 @@ import static android.provider.ContactsContract.CommonDataKinds.Website;
 public class ContactManager {
     public static final String DEBUG_TAG = "#debug";
     public static final String TYPE = "type";
+    public static final String UNDEF = "undefined";
 
 
     private static final String[] PROJECTION_PHONES =
@@ -241,18 +242,6 @@ public class ContactManager {
         }
     }
 
-    // FIXME: 02.03.17 to delete
-//    private void logCursor(@NonNull Cursor cursor) {
-//        if (cursor.isBeforeFirst()) {
-//            while (cursor.moveToNext()) {
-//                Log.d(DEBUG_TAG, "logCursor ----------------");
-//                for (String columnName : cursor.getColumnNames()) {
-//                    Log.d(DEBUG_TAG, columnName + ": " + cursor.getString(cursor.getColumnIndex(columnName)));
-//                }
-//            }
-//        }
-//
-//    }
 
     private static class Contact {
         WritableMap contact = Arguments.createMap();
@@ -261,6 +250,111 @@ public class ContactManager {
             final String value = cursor.getString(cursor.getColumnIndex(androidKey));
             if (!TextUtils.isEmpty(value)) {
                 map.putString(key, value);
+            }
+        }
+
+        private void putString(Cursor cursor, WritableMap map, String key, Types type) {
+            final String value = cursor.getString(cursor.getColumnIndex(type.getAndroidType()));
+            if (!TextUtils.isEmpty(value)) {
+                map.putString(key, getResolvedType(type, value));
+            }
+        }
+
+        private String getResolvedType(Types type, String value) {
+            try {
+                switch (type) {
+                    case EMAIL:
+                        return resolveEmailType(Integer.parseInt(value));
+                    case WEB:
+                        return resolveWebsiteType(Integer.parseInt(value));
+                    case PHONE:
+                        return resolvePhoneType(Integer.parseInt(value));
+                }
+                return UNDEF;
+
+            } catch (NumberFormatException ex) {
+                Log.d(DEBUG_TAG, "NumberFormatException: => undefined");
+                return UNDEF;
+            }
+        }
+
+        private String resolvePhoneType(int type) {
+            switch (type) {
+                case Phone.TYPE_HOME:
+                    return "home";
+                case Phone.TYPE_WORK:
+                    return "work";
+                case Phone.TYPE_ASSISTANT:
+                    return "assistant";
+                case Phone.TYPE_CAR:
+                    return "car";
+                case Phone.TYPE_CALLBACK:
+                    return "callback";
+                case Phone.TYPE_COMPANY_MAIN:
+                    return "company_main";
+                case Phone.TYPE_FAX_HOME:
+                    return "fax_home";
+                case Phone.TYPE_FAX_WORK:
+                    return "fax_work";
+                case Phone.TYPE_ISDN:
+                    return "isdn";
+                case Phone.TYPE_MAIN:
+                    return "main";
+                case Phone.TYPE_MMS:
+                    return "mms";
+                case Phone.TYPE_MOBILE:
+                    return "mobile";
+                case Phone.TYPE_PAGER:
+                    return "pager";
+                case Phone.TYPE_TELEX:
+                    return "telex";
+                case Phone.TYPE_TTY_TDD:
+                    return "tty_tdd";
+                case Phone.TYPE_WORK_MOBILE:
+                    return "work_mobile";
+                case Phone.TYPE_WORK_PAGER:
+                    return "work_pager";
+                case Phone.TYPE_RADIO:
+                    return "radio";
+                default:
+                    return UNDEF;
+            }
+        }
+
+        private String resolveEmailType(int type) {
+            switch (type) {
+                case Email.TYPE_HOME:
+                    return "home";
+                case Email.TYPE_OTHER:
+                    return "other";
+                case Email.TYPE_MOBILE:
+                    return "mobile"; //wtf?
+                case Email.TYPE_WORK:
+                    return "work";
+                default:
+                    return UNDEF;
+
+            }
+        }
+
+        private String resolveWebsiteType(int type) {
+            switch (type) {
+                case Website.TYPE_BLOG:
+                    return "blog";
+                case Website.TYPE_FTP:
+                    return "ftp";
+                case Website.TYPE_HOME:
+                    return "home";
+                case Website.TYPE_HOMEPAGE:
+                    return "homepage";
+                case Website.TYPE_PROFILE:
+                    return "profile";
+                case Website.TYPE_WORK:
+                    return "work";
+                case Website.TYPE_OTHER:
+                    return "other";
+                default:
+                    return UNDEF;
             }
         }
 
@@ -295,7 +389,7 @@ public class ContactManager {
                 while (cursor.moveToNext()) {
                     WritableMap map = Arguments.createMap();
                     putString(cursor, map, "number", Phone.NUMBER);
-                    putString(cursor, map, "label", Phone.TYPE);
+                    putString(cursor, map, "label", Types.PHONE);
                     phones.pushMap(map);
                 }
             } finally {
@@ -313,7 +407,7 @@ public class ContactManager {
                 while (cursor.moveToNext()) {
                     WritableMap map = Arguments.createMap();
                     putString(cursor, map, "address", Email.ADDRESS);
-                    putString(cursor, map, TYPE, Email.TYPE);
+                    putString(cursor, map, TYPE, Types.EMAIL);
                     Log.d(DEBUG_TAG, "\nemails array: +1");
                     emails.pushMap(map);
                 }
@@ -334,7 +428,7 @@ public class ContactManager {
                 while (cursor.moveToNext()) {
                     WritableMap map = Arguments.createMap();
                     putString(cursor, map, "url", Website.URL);
-                    putString(cursor, map, "label", Website.TYPE);
+                    putString(cursor, map, "label", Types.WEB);
                     websites.pushMap(map);
                 }
             } finally {
@@ -372,6 +466,22 @@ public class ContactManager {
         public WritableMap getContact() {
             Log.d(DEBUG_TAG, "\ngetContact: " + contact.toString() + "\n");
             return contact;
+        }
+
+        enum Types {
+            EMAIL(Email.TYPE),
+            WEB(Website.TYPE),
+            PHONE(Phone.TYPE);
+
+            private String type;
+
+            Types(String type) {
+                this.type = type;
+            }
+
+            public String getAndroidType() {
+                return type;
+            }
         }
     }
 }

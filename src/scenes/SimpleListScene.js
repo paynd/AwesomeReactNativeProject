@@ -7,8 +7,7 @@ import {
   Text,
   View,
 } from 'react-native'
-// import Blink from './../
-// import ImageListView from './src/ui/ImageListView'
+import ImageListView from './../ui/ImageListView'
 
 const styles = StyleSheet.create({
   container: {
@@ -22,11 +21,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     margin: 10,
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
 })
 
 export default class SimpleListScene extends Component {
@@ -34,14 +28,8 @@ export default class SimpleListScene extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
+          Welcome to List Scene!
         </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Blink>Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu</Blink>
-
         <ImageListView />
       </View>
     )

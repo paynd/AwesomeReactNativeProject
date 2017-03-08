@@ -2,7 +2,7 @@
  * Created by paynd on 24.02.17.
  */
 import React from 'react'
-import { View, Text, StyleSheet, Image } from 'react-native'
+import { View, Text, StyleSheet, Image, PropTypes } from 'react-native'
 
 const styles = StyleSheet.create({
   container: {
@@ -26,7 +26,6 @@ const styles = StyleSheet.create({
 })
 
 /**
- * todo add props validation
  * @param props expects to contain url, thumbnailUrl, text
  * @constructor
  */
@@ -38,5 +37,10 @@ const RowItemRenderer = props => (
     </Text>
   </View>
 )
+
+RowItemRenderer.propTypes = {
+  title: PropTypes.string.isRequired,
+  thumbnailUrl: PropTypes.string.isRequired,
+}
 
 export default RowItemRenderer

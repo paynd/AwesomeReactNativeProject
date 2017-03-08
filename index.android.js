@@ -8,47 +8,35 @@ import React, { Component } from 'react'
 import {
     AppRegistry,
     StyleSheet,
-    Text,
-    View,
 } from 'react-native'
-import Blink from './src/ui/Blink'
-import ImageListView from './src/ui/ImageListView'
+import MainPageScene from './src/scenes/MainPageScene'
 
 export default class AwesomeProject extends Component {
   render() {
+    const routes = [
+      { title: 'Main Scene', index: 0 },
+      { title: 'Pick Contact', index: 1 },
+      { title: 'List Example', index: 2 },
+    ]
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-                    Welcome to React Native!
-                </Text>
-        <Text style={styles.instructions}>
-                    To get started, edit index.android.js
-                </Text>
-        <Blink>Double tap R on your keyboard to reload,{'\n'}
-                    Shake or press menu button for dev menu</Blink>
-
-        <ImageListView />
-      </View>
+      <Navigator
+        initialRoute={routes[0]}
+        initialRouteStack={routes}
+        renderScene={(route, navigator) =>
+          <MainPageScene route={route} navigator={navigator} routes={routes} />
+        }
+        style={styles.container}
+      />
     )
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: 100,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
   },
 })
 

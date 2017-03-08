@@ -39,10 +39,7 @@ const onPressList = (navigator, routes, route) => {
 export default class MainPageScene extends Component {
   static get defaultProps() {
     return { // fixme - does it valid?
-      title: 'Main page scene',
-      navigator: undefined,
       route: { title: 'Pick Contact', index: 0 },
-      routes: undefined,
     }
   }
 
@@ -72,10 +69,7 @@ export default class MainPageScene extends Component {
     </View>)
   }
 }
-
+//
 MainPageScene.propTypes = {
-  title: React.PropTypes.string,
-  navigator: React.PropTypes.object,
   route: React.PropTypes.object,
-  routes: React.PropTypes.object,
 }

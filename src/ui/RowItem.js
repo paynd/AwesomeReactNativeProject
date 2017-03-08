@@ -38,9 +38,9 @@ const RowItemRenderer = props => (
   </View>
 )
 
-RowItemRenderer.propTypes = {
-  title: PropTypes.string.isRequired,
-  thumbnailUrl: PropTypes.string.isRequired,
-}
+// RowItemRenderer.propTypes = {
+//   title: PropTypes.string.isRequired,
+//   thumbnailUrl: PropTypes.string.isRequired,
+// }
 
 export default RowItemRenderer

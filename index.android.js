@@ -8,6 +8,7 @@ import React, { Component } from 'react'
 import {
     AppRegistry,
     StyleSheet,
+    Navigator,
 } from 'react-native'
 import MainPageScene from './src/scenes/MainPageScene'
 

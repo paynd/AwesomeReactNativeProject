@@ -15,9 +15,7 @@ const styles = StyleSheet.create({
 })
 
 export default class ImageListView extends Component {
-  state = {
-    isData: false,
-  }
+  state = { dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }) }
 
   componentDidMount() {
     getListOfImages().then(this.onSuccess).catch(this.onError)
@@ -25,14 +23,12 @@ export default class ImageListView extends Component {
 
   onSuccess = (response) => {
     // console.log(` response typeof ${typeof response}`)
-    const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
-
     console.log('### Ok')
 
     response.json().then((data) => {
       console.log(`### array legth: ${data.length}`)
       this.setState({
-        dataSource: ds.cloneWithRows(data),
+        dataSource: this.state. dataSource.cloneWithRows(data),
         isData: true,
       })
     })
@@ -52,7 +48,7 @@ export default class ImageListView extends Component {
     return (
       <ListView
         dataSource={this.state.dataSource}
-        renderRow={data => <RowItemRenderer {...data} />}
+        renderRow={data => <RowItemRenderer {...data} />} // на уровень класса
         renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
       />
     )

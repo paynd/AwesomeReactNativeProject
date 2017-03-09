@@ -10,7 +10,7 @@ export default class BasicListView extends Component {
     super(props)
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
     this.state = {
-      dataSource: ds.cloneWithRows([
+      dataSource: ds.cloneWithRows([ //todo вынести вне компонента
         'John', 'Joel', 'James', 'Jimmy', 'Jackson', 'Jillian', 'Julie', 'Devin',
       ]),
     }

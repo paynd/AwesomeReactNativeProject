@@ -3,73 +3,56 @@
  */
 import React, { Component } from 'react'
 import { Button, StyleSheet, Text, View } from 'react-native'
-import ContactPickerScene from './ContactPickerScene'
-import SimpleListScene from './SimpleListScene'
-
-const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  buttons: {
-    textAlign: 'center',
-    color: '#333333',
-    padding: 20,
-    marginBottom: 5,
-  },
-})
-
-const onPickContactPressed = (navigator, routes, route) => {
-  if (route.index === 0) {
-    navigator.push(routes[1])
-  }
-}
-const onPressList = (navigator, routes, route) => {
-  if (route.index === 0) {
-    navigator.push(routes[2])
-  }
-}
 
 export default class MainPageScene extends Component {
   static get defaultProps() {
-    return { // fixme - does it valid?
+    return {
       route: { title: 'Pick Contact', index: 0 },
     }
   }
 
   render() {
-    if (this.props.route.index === 1) {
-      return <ContactPickerScene title={this.props.route.title} />
-    } else if (this.props.route.index === 2) {
-      return <SimpleListScene />
-    }
-
     return (<View style={styles.container}>
       <Text style={styles.welcome}>
-        {this.props.title}
+        {this.props.route.title}
       </Text>
       <Button
-        onPress={onPickContactPressed(this.props.navigator, this.props.routes, this.props.route)}
+        onPress={this.props.handlePressedPickContact}
         style={styles.buttons}
-        title={this.props.route.title}>
-            Contacts
-          </Button>
+        title={'Contacts'}
+      />
       <Button
-        onPress={onPressList(this.props.navigator, this.props.routes, this.props.route)}
+        onPress={this.props.handlePressList}
         style={styles.buttons}
-        title={this.props.route.title}>
-            List
-          </Button>
+        title={'List'}
+      />
     </View>)
   }
 }
 //
 MainPageScene.propTypes = {
+  handlePressedPickContact: React.PropTypes.func,
+  handlePressList: React.PropTypes.func,
   route: React.PropTypes.object,
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 80,
+    paddingTop: 140,
+    paddingBottom: 140,
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    backgroundColor: '#F5FCFF',
+  },
+  buttons: {
+    flex: 1,
+    height: 180,
+    width: 250,
+    padding: 20,
+    margin: 20,
+    justifyContent: 'space-between',
+    backgroundColor: '#F5FCFF',
+  },
+})
